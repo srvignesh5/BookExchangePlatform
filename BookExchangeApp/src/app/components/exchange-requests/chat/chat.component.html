@@ -1,0 +1,55 @@
+<div class="chat-container">
+  <div class="chat-header">
+    <h5>Chat for Exchange Request #{{ exchangeRequestId }}</h5>
+  </div>
+  <div class="chat-body" #chatBody>
+    <div *ngFor="let message of messages"
+         class="chat-message"
+         [ngClass]="{
+           'right-align': message.senderId == currentUserId,
+           'left-align': message.senderId != currentUserId
+         }">
+      <p class="message-text">{{ message.text }}</p>
+      <div class="message-info">
+        <span class="message-time">{{ message.sendDatetime | date: 'shortTime' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-footer">
+    <textarea [(ngModel)]="newMessage" placeholder="Type your message here..." rows="3"></textarea>
+
+    <div class="button-group">
+      <div class="send-group"  *ngIf="SenderId != currentUserId">
+        <select [(ngModel)]="selectedStatus" class="status-select">
+          <option value="normal" selected>Status: Chat...</option>
+          <option value="Initiated">Initiated</option>
+          <option value="Payment Initiated">Payment Initiated</option>
+          <option value="Payment Pending">Payment Pending</option>
+          <option value="Payment Received">Payment Received</option>
+          <option value="Shipment Initiated">Shipment Initiated</option>
+          <option value="Delivered">Delivered</option>
+          <option value="Completed">Completed</option>
+          <option value="Cancelled">Cancelled</option>
+          <option value="Refunded">Refunded</option>
+        </select>
+      </div>
+      <div class="send-group"  *ngIf="SenderId == currentUserId">
+        <select [(ngModel)]="selectedStatus" class="status-select">
+          <option value="normal" selected>Status: Chat...</option>
+          <option value="Initiated">Initiated</option>
+          <option value="Payment Initiated">Payment Initiated</option>
+          <option value="Payment Complete">Payment Complete</option>
+          <option value="Delivered">Delivered</option>
+          <option value="Completed">Completed</option>
+          <option value="Refunded Initiated">Refunded Initiated</option>
+        </select>
+      </div>
+
+      <div class="action-buttons">
+        <button class="cancel-btn" (click)="close()">Cancel</button>
+        <button class="send-btn" (click)="sendMessage()">Send</button>
+      </div>
+    </div>
+  </div>
+</div>

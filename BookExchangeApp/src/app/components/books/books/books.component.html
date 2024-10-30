@@ -1,0 +1,114 @@
+<div class="container mt-4">
+  <div class="row mb-12">
+    <div class="col-md-4 text-end">
+      <h3>Books</h3>
+    </div>
+    <div class="col-md-8">
+      <input 
+        type="text" 
+        class="form-control search-input" 
+        placeholder="Search by Title, Author, Genre..." 
+        [(ngModel)]="searchQuery" 
+        (input)="searchBooks()"
+      />
+    </div>
+    <div class="col-md-2"></div> 
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <div class="text-center">
+    <pagination-controls (pageChange)="page = $event"></pagination-controls>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-striped table-bordered table-hover">
+      <thead class="thead-dark">
+        <tr>
+          <th>#</th>
+          <th (click)="sortData('title')">Title <i class="fa fa-sort"></i></th>
+          <th (click)="sortData('author')">Author <i class="fa fa-sort"></i></th>
+          <th (click)="sortData('genre')">Genre <i class="fa fa-sort"></i></th>
+          <th (click)="sortData('condition')">Condition <i class="fa fa-sort"></i></th>
+          <th (click)="sortData('availabilityStatus')">Availability <i class="fa fa-sort"></i></th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let book of filteredBooks | paginate: { itemsPerPage: 10, currentPage: page }; let i = index">
+          <td>{{ (page - 1) * 10 + i + 1 }}</td>
+          <td>{{ book.title }}</td>
+          <td>{{ book.author }}</td>
+          <td>{{ book.genre }}</td>
+          <td>{{ book.condition }}</td>
+          <td>{{ book.availabilityStatus ? 'Available' : 'Unavailable' }}</td>
+          <td>
+            <button class="btn btn-primary btn-sm mx-1" (click)="viewBookDetails(book.bookId, bookDetailsModal)">View</button>
+            <button 
+              class="btn btn-warning btn-sm" 
+              (click)="openBookExchangeModal(bookExchangeModal, book)" 
+              *ngIf="(book.userId.toString() != currentUserId)"
+              [disabled]="!book.availabilityStatus || currentUserId == book.userId.toString() || isExchangeInitiated(book.bookId)">
+              Exchange
+            </button>
+            <button class="btn btn-danger btn-sm mx-1" (click)="confirmDelete(book.bookId)" *ngIf="isAdmin">Delete</button>
+            <button class="btn btn-info btn-sm mx-1" 
+              (click)="openChat(book.bookId)" 
+              *ngIf="isExchangeInitiated(book.bookId) && (book.userId.toString() != currentUserId)">
+              Chat
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="text-center">
+    <pagination-controls (pageChange)="page = $event"></pagination-controls>
+  </div>
+
+  <ng-template #bookDetailsModal>
+    <div class="modal-header bg-light">
+      <h5 class="modal-title">Book: {{ selectedBook?.title }}</h5>
+      <button type="button" class="close" aria-label="Close" (click)="modalRef?.hide()">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p><strong>Book Name:</strong> {{ selectedBook?.title }}</p>
+      <p><strong>Author:</strong> {{ selectedBook?.author }}</p>
+      <p><strong>Genre:</strong> {{ selectedBook?.genre }}</p>
+      <p><strong>Condition:</strong> {{ selectedBook?.condition }}</p>
+      <p><strong>Availability:</strong> {{ selectedBook?.availabilityStatus ? 'Yes' : 'No' }}</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="modalRef?.hide()">Close</button>
+    </div>
+  </ng-template>
+
+  <ng-template #bookExchangeModal>
+    <div class="modal-header bg-light">
+      <h5 class="modal-title">Book Exchange - {{ selectedBook?.title }}</h5>
+      <button type="button" class="close" aria-label="Close" (click)="modalRef?.hide()">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p><strong>Book Name:</strong> {{ selectedBook?.title }}</p>
+      <p><strong>Author:</strong> {{ selectedBook?.author }}</p>
+      <p><strong>Genre:</strong> {{ selectedBook?.genre }}</p>
+      <p><strong>Condition:</strong> {{ selectedBook?.condition }}</p>
+      <p><strong>Availability:</strong> {{ selectedBook?.availabilityStatus ? 'Yes' : 'No' }}</p>
+      <div class="form-group">
+        <label for="negotiationDetails">Negotiation Message:</label>
+        <textarea [(ngModel)]="negotiationDetails" class="form-control" id="negotiationDetails" rows="3"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="modalRef?.hide()">Cancel</button>
+      <button type="button" class="btn btn-primary" (click)="sendExchangeRequest()">Send Exchange Request</button>
+    </div>
+  </ng-template>
+</div>

@@ -1,0 +1,14 @@
+<div class="user-details-container">
+    <h2>User Details</h2>
+    <div *ngIf="user">
+      <p><strong>Full Name:</strong> {{ user.fullName }}</p>
+      <p><strong>Email:</strong> {{ user.email }}</p>
+      <p><strong>Role:</strong> {{ user.role }}</p>
+      <p><strong>Preferences:</strong> {{ user.preferences }}</p>
+      <p><strong>Address:</strong> {{ user.address }}</p>
+      <p><strong>Bio:</strong> {{ user.bio }}</p>
+      <p><strong>Favorite Genres:</strong> {{ user.favoriteGenres }}</p>
+    </div>
+    <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+  </div>
+  

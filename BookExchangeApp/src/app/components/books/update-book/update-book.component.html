@@ -1,0 +1,33 @@
+<div class="container">
+    <h1 class="text-center my-4">Update Book</h1>
+    <form (ngSubmit)="updateBook()" #updateBookForm="ngForm">
+      <div class="mb-3">
+        <label for="title" class="form-label">Title</label>
+        <input type="text" id="title" class="form-control" [(ngModel)]="book.title" name="title" required>
+      </div>
+      
+      <div class="mb-3">
+        <label for="author" class="form-label">Author</label>
+        <input type="text" id="author" class="form-control" [(ngModel)]="book.author" name="author" required>
+      </div>
+  
+      <div class="mb-3">
+        <label for="genre" class="form-label">Genre</label>
+        <input type="text" id="genre" class="form-control" [(ngModel)]="book.genre" name="genre" required>
+      </div>
+  
+      <div class="mb-3">
+        <label for="condition" class="form-label">Condition</label>
+        <input type="text" id="condition" class="form-control" [(ngModel)]="book.condition" name="condition" required>
+      </div>
+  
+      <div class="mb-3 form-check">
+        <input type="checkbox" id="availabilityStatus" class="form-check-input" [(ngModel)]="book.availabilityStatus" name="availabilityStatus">
+        <label for="availabilityStatus" class="form-check-label">Available</label>
+      </div>
+  
+      <button type="submit" class="btn btn-primary">Update Book</button>
+      <button type="button" class="btn btn-secondary" (click)="router.navigate(['/books/my-books'])">Cancel</button>
+    </form>
+  </div>
+  
