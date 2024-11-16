@@ -1,0 +1,12 @@
+a {
+  text-decoration: none;
+  color: #007bff;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.form-group.mt-3 {
+  margin-top: 1rem; 
+}

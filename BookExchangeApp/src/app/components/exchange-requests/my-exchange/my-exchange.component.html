@@ -1,0 +1,193 @@
+<div class="container mt-4">
+    <div class="row mb-12">
+        <div class="col-md-4 text-end">
+            <h3>My Exchanges</h3>
+        </div>
+        <div class="col-md-8">
+            <input
+                type="text"
+                class="form-control search-input"
+                placeholder="Search by Title,Author,Exchange Requested by..."
+                [(ngModel)]="searchQuery"
+            />
+        </div>
+    </div>
+
+    <div class="text-center">
+        <pagination-controls (pageChange)="page = $event"></pagination-controls>
+    </div>
+
+    <div *ngIf="errorMessage" class="alert alert-danger">
+        {{ errorMessage }}
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>#</th>
+                    <th (click)="sortData('ExchangeID')">Exchange ID<i class="fa fa-sort"></i></th>
+                    <th (click)="sortData('bookTitle')">Book Title <i class="fa fa-sort"></i></th>
+                    <th (click)="sortData('author')">Author <i class="fa fa-sort"></i></th>
+                    <th (click)="sortData('sender')">Exchange Requested by <i class="fa fa-sort"></i></th>
+                    <th (click)="sortData('status')">Requested At <i class="fa fa-sort"></i></th>
+                    <th (click)="sortData('availabilityStatus')">Available <i class="fa fa-sort"></i></th>
+                    <th (click)="sortData('status')">Status <i class="fa fa-sort"></i></th>
+                    <th (click)="sortData('transactionStatus')">Transaction Status <i class="fa fa-sort"></i></th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let exchange of filteredExchanges | paginate: { itemsPerPage: 10, currentPage: page }; let i = index">
+                    <td>{{ (page - 1) * 10 + i + 1 }}</td>
+                    <td>{{ exchange.exchangeRequestId }}</td>
+                    <td>{{ exchange.book?.title }}</td>
+                    <td>{{ exchange.book?.author }}</td>
+                    <td *ngIf="exchange.senderId != currentUserId"> 
+                        {{ getUserName(exchange.senderId) }}
+                    </td>
+                    <td *ngIf="exchange.receiverId != currentUserId"> 
+                        {{ getUserName(exchange.receiverId) }}
+                    </td>
+                    <td>{{ exchange.creationDatetime | date:'dd-MM-yyyy h:mm a' }}</td>
+                    <td>{{ exchange.book.availabilityStatus ? 'Yes' : 'No' }}</td>
+                    <td>
+                        <span *ngIf="exchange.status== 'Accepted' && exchange.receiverId == currentUserId"  [ngClass]="getStatusColor(exchange.status)">
+                            {{ exchange.status }} (You)
+                        </span>
+                        <span *ngIf="exchange.status== 'Accepted' && exchange.receiverId != currentUserId"  [ngClass]="getStatusColor(exchange.status)">
+                            {{ exchange.status }} 
+                        </span>
+                        <span *ngIf="exchange.status== 'Declined' && exchange.receiverId == currentUserId"  [ngClass]="getStatusColor(exchange.status)">
+                            {{ exchange.status }} (You)
+                        </span>
+                        <span *ngIf="exchange.status== 'Declined' && exchange.receiverId != currentUserId"  [ngClass]="getStatusColor(exchange.status)">
+                            {{ exchange.status }}
+                        </span>
+                        <span *ngIf="exchange.status== 'Cancelled' && exchange.receiverId == currentUserId"  [ngClass]="getStatusColor(exchange.status)">
+                            {{ exchange.status }}  (Sender)
+                        </span>
+                        <span *ngIf="exchange.status== 'Cancelled' && exchange.receiverId != currentUserId"  [ngClass]="getStatusColor(exchange.status)">
+                            {{ exchange.status }}  (You)
+                        </span>
+                        <span *ngIf="exchange.status== 'Pending'"  [ngClass]="getStatusColor(exchange.status)">
+                            {{ exchange.status }}
+                        </span> 
+                        <select *ngIf="exchange.receiverId != currentUserId" 
+                                [(ngModel)]="exchange.status" 
+                                [ngClass]="getStatusColor(exchange.status)"
+                                (change)="updateStatus(exchange, $event)" 
+                                class="form-select form-select-sm mt-2">
+                                <option value="Pending" [ngClass]="{'text-primary': true}">Requested (You)</option>
+                                <option value="Pending" [ngClass]="{'text-success': true}">Request Again</option>
+                                <option value="Cancelled" [ngClass]="{'text-danger': true}">Cancel</option>
+                                <option value="Accepted" [ngClass]="{'text-success': true}" disabled="true">Accepted</option>
+                                <option value="Declined" [ngClass]="{'text-danger': true}" disabled="true">Declined</option>
+                        </select>
+                        <select *ngIf="exchange.receiverId == currentUserId" 
+                                [(ngModel)]="exchange.status" 
+                                [ngClass]="getStatusColor(exchange.status)"
+                                (change)="updateStatus(exchange, $event)" 
+                                class="form-select form-select-sm mt-2">
+                                <option value="Pending" [ngClass]="{'text-warning': true}">Pending</option>
+                                <option value="Accepted" [ngClass]="{'text-success': true}">Accept</option>
+                                <option value="Declined" [ngClass]="{'text-danger': true}">Decline</option>
+                                <option value="Cancelled" [ngClass]="{'text-danger': true}" disabled="true">Cancelled</option>
+                        </select>
+                    </td>
+                    <td>
+                        <span [ngStyle]="{'color': getTransactionStatusColor(getLatestTransactionStatus(exchange.exchangeRequestId))}">
+                            {{ getLatestTransactionStatus(exchange.exchangeRequestId) }}
+                        </span>
+                        <div *ngIf="exchange.senderId != currentUserId">
+                            <select [(ngModel)]="transactionStatusMap[exchange.exchangeRequestId!]" 
+                                    (ngModelChange)="onTransactionStatusChange(exchange, $event)" 
+                                    class="form-select form-select-sm mt-2"
+                                    [ngStyle]="{'color': getTransactionStatusColor(transactionStatusMap[exchange.exchangeRequestId!])}">
+                                <option *ngFor="let status of ['Initiated', 'Payment Initiated', 'Payment Pending', 'Payment Received', 'Shipment Initiated', 'Delivered', 'Completed', 'Cancelled', 'Refunded']"
+                                        [value]="status" 
+                                        [ngStyle]="{'color': getTransactionStatusColor(status)}">
+                                    {{ status }}
+                                </option>
+                            </select>
+                        </div>
+                        <div *ngIf="exchange.senderId == currentUserId">
+                            <select [(ngModel)]="transactionStatusMap[exchange.exchangeRequestId!]" 
+                                    (ngModelChange)="onTransactionStatusChange(exchange, $event)" 
+                                    class="form-select form-select-sm mt-2"
+                                    [ngStyle]="{'color': getTransactionStatusColor(transactionStatusMap[exchange.exchangeRequestId!])}">
+                                <option *ngFor="let status of ['Initiated', 'Payment Initiated', 'Delivered', 'Refunded Received','Completed']"
+                                        [value]="status" 
+                                        [ngStyle]="{'color': getTransactionStatusColor(status)}">
+                                    {{ status }}
+                                </option>
+                            </select>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="d-flex mb-2">
+                            <button class="btn btn-info btn-sm mx-1" (click)="openChat(exchange.bookId)" *ngIf="isExchangeInitiated(exchange.bookId)">Chat</button>
+                            <button class="btn btn-primary btn-sm mx-1" *ngIf="exchange.exchangeRequestId" (click)="viewExchangeDetails(exchange.exchangeRequestId, exchangeDetailsModal)">View</button>
+                        </div>
+                        <div class="d-flex">
+                            <button class="btn btn-warning btn-sm mx-1" *ngIf="exchange.exchangeRequestId" (click)="fetchTransactionHistories(exchange.exchangeRequestId, transactionDetailsModal)">Transactions</button>
+                            <button class="btn btn-danger btn-sm mx-1" *ngIf="exchange.senderId == currentUserId && exchange.status != 'Accepted'" (click)="confirmDelete(exchange.exchangeRequestId)">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="text-center">
+        <pagination-controls (pageChange)="page = $event"></pagination-controls>
+    </div>
+
+    <ng-template #exchangeDetailsModal>
+        <div class="modal-header bg-light">
+            <h5 class="modal-title">Exchange Details</h5>
+            <button type="button" class="close" aria-label="Close" (click)="modalRef?.hide()">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p><strong>Exchange Request ID:</strong> {{ selectedExchange.exchangeRequestId }}</p>
+            <p><strong>Book Title:</strong> {{ selectedExchange.book?.title }}</p>
+            <p><strong>Author:</strong> {{ selectedExchange.book?.author }}</p>
+            <p><strong>Sender:</strong> {{ selectedExchange.senderId }}</p>
+            <p><strong>Receiver:</strong> {{ selectedExchange.receiverId }}</p>
+            <p><strong>Status:</strong> {{ selectedExchange.status }}</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="modalRef?.hide()">Close</button>
+        </div>
+    </ng-template>
+
+    <ng-template #transactionDetailsModal>
+        <div class="modal-header bg-light">
+            <h5 class="modal-title">Transaction History</h5>
+            <button type="button" class="close" aria-label="Close" (click)="modalRef?.hide()">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div *ngIf="transactionHistories.length; else noHistory">
+                <ul class="list-unstyled">
+                    <li *ngFor="let history of transactionHistories; let i = index" class="step">
+                        <div class="step-number">{{ i + 1 }}</div>
+                        <div class="step-content">
+                            <strong>{{ history.status }}</strong> 
+                            <span>({{ history.creationDatetime | date:'short' }})</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <ng-template #noHistory>
+                <div>No transaction history available.</div>
+            </ng-template>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="modalRef?.hide()">Close</button>
+        </div>
+    </ng-template>
+</div>

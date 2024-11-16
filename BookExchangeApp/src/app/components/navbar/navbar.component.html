@@ -1,0 +1,38 @@
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#" style="font-size: 24px;">Book Exchange Platform</a>
+    
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse justify-content-between" id="navbarContent">
+      <div class="navbar-nav">
+        <a *ngIf="isLoggedIn()" class="nav-link" routerLink="/books">Books</a>
+        <a *ngIf="isLoggedIn() && isAdmin()" class="nav-link" routerLink="/users">Users</a>
+        <a *ngIf="isLoggedIn()" class="nav-link" routerLink="/my-books">My Books</a>
+        <a *ngIf="isLoggedIn()" class="nav-link" routerLink="/my-exchange">My Exchange</a>
+      </div>
+
+      <div class="navbar-nav ms-auto">
+        <ng-container *ngIf="isLoggedIn(); else guestNav">
+          <span class="navbar-text me-2">{{ fullName }}</span>
+          <div class="dropdown">
+            <a class="nav-link dropdown-toggle" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              My Profile
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="profileDropdown">
+              <li><a class="dropdown-item" routerLink="/profile">Profile</a></li>
+              <li><a class="dropdown-item" routerLink="/change-password">Change Password</a></li>
+            </ul>
+          </div>
+          <a class="nav-link" (click)="logout()">Logout</a>
+        </ng-container>
+        <ng-template #guestNav>
+          <a class="nav-link" routerLink="/login">Login</a>
+          <a class="nav-link" routerLink="/register">Register</a>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</nav>

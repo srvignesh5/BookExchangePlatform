@@ -1,0 +1,38 @@
+.text-center h2 {
+  margin-bottom: 20px;
+}
+
+.search-input {
+  width: 50%; 
+  margin-bottom: 20px;
+  direction: ltr
+}
+
+.pagination-center {
+  display: inline-block;
+  margin-top: 10px;
+  text-align: center; 
+}
+
+.thead-dark {
+  background-color: #343a40;
+  color: #ffffff;
+}
+
+.modal-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6; 
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+}
+
+.close {
+  margin-left: auto;
+}
+
+.btn-disabled {
+  background-color: #cccccc; 
+  color: #666666; 
+  cursor: not-allowed;
+}
